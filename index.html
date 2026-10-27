@@ -436,20 +436,22 @@
         Promise.resolve(maplibregl.setRTLTextPlugin('https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js', true)).catch(() => {});
       }
       const name = ['coalesce', ['get', 'name:ar'], ['get', 'name']];
+      // Roads and names only inside the Kingdom; other countries show just the dimmed satellite image.
+      const inSA = ['within', window.SA_CLIP];
       const halo = { 'text-color': '#ffffff', 'text-halo-color': 'rgba(0, 0, 0, .85)', 'text-halo-width': 1.4, 'text-halo-blur': 0.4 };
 
       map = new maplibregl.Map({
         container: 'map',
         bounds: SA_BOUNDS, fitBoundsOptions: { padding: 40 },
         bearing: -20,
-        minZoom: 3.2, maxZoom: 15, maxPitch: 75,
+        minZoom: 1, maxZoom: 15, maxPitch: 75,
         // Performance: phones with 3× screens would otherwise draw 9× the pixels; no repeated world copies.
         pixelRatio: Math.min(window.devicePixelRatio || 1, narrow() ? 1.5 : 2),
         renderWorldCopies: false,
         attributionControl: { compact: true },
         style: {
           version: 8,
-          // Dark sky that blends into the mask, so only Saudi Arabia stands out.
+          // Dark sky behind the tilted horizon.
           sky: {
             'sky-color': '#020617',
             'sky-horizon-blend': 0.5,
@@ -480,7 +482,6 @@
               attribution: 'Terrain © Mapzen, AWS Open Data',
             },
             regions: { type: 'geojson', data: window.SA_REGIONS, attribution: 'Boundaries © geoBoundaries' },
-            country: { type: 'geojson', data: window.SA_COUNTRY },
             mask: { type: 'geojson', data: window.SA_MASK },
           },
           layers: [
@@ -488,42 +489,40 @@
             { id: 'zone-fill', type: 'fill', source: 'regions', paint: { 'fill-color': zoneColors(), 'fill-opacity': 0.1, 'fill-opacity-transition': { duration: 900 }, 'fill-color-transition': { duration: 900 } } },
             // Roads: highways in yellow, main roads pale, local roads appear as you zoom in.
             { id: 'road-minor', type: 'line', source: 'osm', 'source-layer': 'transportation', minzoom: 8,
-              filter: ['in', ['get', 'class'], ['literal', ['secondary', 'tertiary', 'minor']]],
+              filter: ['all', inSA, ['in', ['get', 'class'], ['literal', ['secondary', 'tertiary', 'minor']]]],
               layout: { 'line-join': 'round', 'line-cap': 'round' },
               paint: { 'line-color': '#ffffff', 'line-opacity': 0.55, 'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 2.4] } },
             { id: 'road-primary', type: 'line', source: 'osm', 'source-layer': 'transportation', minzoom: 6,
-              filter: ['==', ['get', 'class'], 'primary'],
+              filter: ['all', inSA, ['==', ['get', 'class'], 'primary']],
               layout: { 'line-join': 'round', 'line-cap': 'round' },
               paint: { 'line-color': '#fff1bf', 'line-opacity': 0.8, 'line-width': ['interpolate', ['linear'], ['zoom'], 6, 0.5, 14, 3.5] } },
             { id: 'road-major', type: 'line', source: 'osm', 'source-layer': 'transportation', minzoom: 4,
-              filter: ['in', ['get', 'class'], ['literal', ['motorway', 'trunk']]],
+              filter: ['all', inSA, ['in', ['get', 'class'], ['literal', ['motorway', 'trunk']]]],
               layout: { 'line-join': 'round', 'line-cap': 'round' },
               paint: { 'line-color': '#f7cf5e', 'line-opacity': 0.9, 'line-width': ['interpolate', ['linear'], ['zoom'], 4, 0.5, 8, 1.6, 14, 5] } },
             // Road numbers, as small green tags.
             { id: 'road-shield', type: 'symbol', source: 'osm', 'source-layer': 'transportation_name', minzoom: 7,
-              filter: ['all', ['has', 'ref'], ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary']]]],
+              filter: ['all', inSA, ['has', 'ref'], ['in', ['get', 'class'], ['literal', ['motorway', 'trunk', 'primary']]]],
               layout: { 'symbol-placement': 'line', 'symbol-spacing': 420, 'text-field': ['get', 'ref'], 'text-font': ['Noto Sans Bold'], 'text-size': 10, 'text-rotation-alignment': 'viewport', 'text-padding': 8 },
               paint: { 'text-color': '#ffffff', 'text-halo-color': '#2e7d32', 'text-halo-width': 3 } },
             // Place names in Arabic: cities from the start, towns and villages as you zoom in.
             { id: 'place-village', type: 'symbol', source: 'osm', 'source-layer': 'place', minzoom: 8,
-              filter: ['in', ['get', 'class'], ['literal', ['village', 'suburb', 'hamlet']]],
+              filter: ['all', inSA, ['in', ['get', 'class'], ['literal', ['village', 'suburb', 'hamlet']]]],
               layout: { 'text-field': name, 'text-font': ['Noto Sans Regular'], 'text-size': 11 },
               paint: halo },
             { id: 'place-town', type: 'symbol', source: 'osm', 'source-layer': 'place', minzoom: 5,
-              filter: ['==', ['get', 'class'], 'town'],
+              filter: ['all', inSA, ['==', ['get', 'class'], 'town']],
               layout: { 'text-field': name, 'text-font': ['Noto Sans Regular'], 'text-size': ['interpolate', ['linear'], ['zoom'], 5, 10, 12, 14] },
               paint: halo },
             { id: 'place-city', type: 'symbol', source: 'osm', 'source-layer': 'place', minzoom: 4.5,
-              filter: ['==', ['get', 'class'], 'city'],
+              filter: ['all', inSA, ['==', ['get', 'class'], 'city']],
               layout: { 'text-field': name, 'text-font': ['Noto Sans Bold'], 'text-size': ['interpolate', ['linear'], ['zoom'], 4.5, 11, 10, 17] },
               paint: halo },
             { id: 'borders', type: 'line', source: 'regions', paint: { 'line-color': '#ffffff', 'line-opacity': 0.14, 'line-width': 0.7 } },
             { id: 'zone-glow', type: 'line', source: 'regions', filter: ['!=', ['get', 'zone'], 'other'], layout: { 'line-join': 'round' }, paint: { 'line-color': zoneColors(), 'line-width': 9, 'line-blur': 7, 'line-opacity': 0.5, 'line-opacity-transition': { duration: 900 } } },
             { id: 'zone-line', type: 'line', source: 'regions', filter: ['!=', ['get', 'zone'], 'other'], layout: { 'line-join': 'round' }, paint: { 'line-color': zoneColors(), 'line-width': 1.6, 'line-opacity': 0.9, 'line-opacity-transition': { duration: 900 } } },
-            // Everything outside the Kingdom is blacked out.
-            { id: 'mask', type: 'fill', source: 'mask', paint: { 'fill-color': '#020617', 'fill-opacity': 1, 'fill-antialias': false } },
-            { id: 'country-glow', type: 'line', source: 'country', layout: { 'line-join': 'round' }, paint: { 'line-color': '#5cc3ff', 'line-width': 12, 'line-blur': 10, 'line-opacity': 0.38 } },
-            { id: 'country-line', type: 'line', source: 'country', layout: { 'line-join': 'round' }, paint: { 'line-color': '#e0f2fe', 'line-width': 1.3, 'line-opacity': 0.75 } },
+            // Everything outside the Kingdom is dimmed (still visible) so Saudi Arabia stands out bright.
+            { id: 'mask', type: 'fill', source: 'mask', paint: { 'fill-color': '#020617', 'fill-opacity': 0.65, 'fill-antialias': false } },
           ],
         },
       });
@@ -570,15 +569,6 @@
       map.on('mousemove', (e) => {
         const zone = map.queryRenderedFeatures(e.point, { layers: ['zone-fill'] })[0]?.properties.zone;
         map.getCanvas().style.cursor = zone && zone !== 'other' && zone !== current ? 'pointer' : current ? 'zoom-out' : '';
-      });
-
-      // Keep the camera over the Kingdom.
-      map.on('moveend', () => {
-        if (measuring) return;
-        const c = map.getCenter();
-        const lng = Math.min(Math.max(c.lng, 34), 56);
-        const lat = Math.min(Math.max(c.lat, 16), 32);
-        if (lng !== c.lng || lat !== c.lat) map.easeTo({ center: [lng, lat], duration: 500 });
       });
     }
 
