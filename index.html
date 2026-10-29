@@ -414,7 +414,7 @@
       position: fixed;
       z-index: 35;
       right: calc(50% - var(--app-w) / 2 + 16px); /* opposite end from the logo */
-      top: 26px;
+      top: 38px;
       font-family: 'Cairo', system-ui, sans-serif;
       visibility: hidden;
       opacity: 0;
@@ -469,7 +469,7 @@
     /* The X sits where the map button is */
     .menu-close {
       position: fixed;
-      top: 26px;
+      top: 38px;
       right: calc(50% - var(--app-w) / 2 + 16px);
     }
     .menu-list {
@@ -542,7 +542,7 @@
       .region-menu,
       .menu-close {
         right: calc(50% - var(--app-w) / 2 + 10px);
-        top: 14px;
+        top: 26px;
       }
       .menu-toggle,
       .menu-close { width: 36px; height: 36px; }
@@ -618,7 +618,7 @@
      * LOGO INTRO: centered on blue, then glides to the top edge
      * ========================================================= */
     :root {
-      --logo-space: 96px; /* room kept free for the logo at the top */
+      --logo-space: 108px; /* room kept free for the logo at the top */
       --footer-space: 64px; /* room kept free for the footer at the bottom */
       --app-w: min(100vw, 480px); /* max width of the page column */
     }
@@ -638,7 +638,7 @@
       position: fixed;
       z-index: 40;
       left: calc(50% - var(--app-w) / 2 + 16px);
-      top: 16px;
+      top: 28px;
       width: 190px;
       aspect-ratio: 895 / 279;
       display: grid;
@@ -656,16 +656,16 @@
       0% { left: 50%; top: 50%; width: min(380px, 70vw); transform: translate(-50%, -50%); opacity: 0; }
       18% { left: 50%; top: 50%; width: min(640px, 90vw); transform: translate(-50%, -50%); opacity: 1; }
       55% { left: 50%; top: 50%; width: min(640px, 90vw); transform: translate(-50%, -50%); opacity: 1; }
-      100% { left: calc(50% - var(--app-w) / 2 + 16px); top: 16px; width: 190px; transform: translate(0, 0); opacity: 1; }
+      100% { left: calc(50% - var(--app-w) / 2 + 16px); top: 28px; width: 190px; transform: translate(0, 0); opacity: 1; }
     }
     @media (max-width: 640px) {
-      :root { --logo-space: 72px; --footer-space: 58px; }
-      .intro-logo { left: calc(50% - var(--app-w) / 2 + 10px); top: 10px; width: 140px; }
+      :root { --logo-space: 84px; --footer-space: 58px; }
+      .intro-logo { left: calc(50% - var(--app-w) / 2 + 10px); top: 22px; width: 140px; }
       @keyframes intro-logo {
         0% { left: 50%; top: 50%; width: min(380px, 70vw); transform: translate(-50%, -50%); opacity: 0; }
         18% { left: 50%; top: 50%; width: min(640px, 90vw); transform: translate(-50%, -50%); opacity: 1; }
         55% { left: 50%; top: 50%; width: min(640px, 90vw); transform: translate(-50%, -50%); opacity: 1; }
-        100% { left: calc(50% - var(--app-w) / 2 + 10px); top: 10px; width: 140px; transform: translate(0, 0); opacity: 1; }
+        100% { left: calc(50% - var(--app-w) / 2 + 10px); top: 22px; width: 140px; transform: translate(0, 0); opacity: 1; }
       }
     }
     @media (prefers-reduced-motion: reduce) {
